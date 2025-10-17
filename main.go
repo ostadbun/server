@@ -1,14 +1,12 @@
-package main
+// package main
 
-import "github.com/gofiber/fiber/v2"
+// import (
+// 	envConf "ostadbun/config"
+// 	"ostadbun/database"
+// )
 
-func main() {
-	app := fiber.New()
+// func main() {
+// 	env := envConf.GetConfig()
+// 	db := database.NewPostgresSql(env)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	app.Listen(":3000")
-
-}
+// }
