@@ -18,8 +18,6 @@ func main() {
 
 	e.POST("google", func(c echo.Context) error {
 
-		// token := ""
-
 		var token Req
 
 		e := c.Bind(&token)
@@ -34,12 +32,6 @@ func main() {
 
 			return c.String(200, err.Error())
 		}
-
-		// claims := payload.Claims
-
-		// email := claims["email"]
-		// name := claims["name"]
-		// picture := claims["picture"]
 
 		return c.JSON(200, payload.Claims)
 
