@@ -1,15 +1,15 @@
-package auth
+package entity
 
 import (
 	"fmt"
-	"ostadbun/interface/auth"
+	"ostadbun/interface/entity"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func (c Controller) Auth(f *fiber.Ctx) error {
+func (c Controller) Entity(f *fiber.Ctx) error {
 
-	var data auth.IAuth
+	var data entity.ISearch
 	err := f.BodyParser(&data)
 
 	if err != nil {
@@ -18,11 +18,11 @@ func (c Controller) Auth(f *fiber.Ctx) error {
 		fmt.Println("🐥")
 	}
 
-	req, err := c.Svc.RequestToGoogle(data)
+	d := c.Svc.Search(data.Q)
 
 	if err != nil {
 		return f.SendString(err.Error())
 	}
 
-	return f.SendString(fmt.Sprintf("Hello, World! %s", req))
+	return f.JSON(d)
 }

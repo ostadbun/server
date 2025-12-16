@@ -1,8 +1,8 @@
-package auth
+package entity
 
 import (
-	authReposipory "ostadbun/repository/auth"
-	authService "ostadbun/service/auth"
+	entityrepository "ostadbun/repository/entity"
+	entityService "ostadbun/service/entity"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -10,15 +10,15 @@ import (
 
 type Controller struct {
 	app fiber.Router
-	Svc authService.Auth
+	Svc entityService.Entity
 }
 
 func Config(app fiber.Router, db *pgx.Conn, prefix ...string) {
-	repo := authReposipory.Make(db)
-	svc := authService.Config(repo)
+	repo := entityrepository.Make(db)
+	svc := entityService.Config(repo)
 
 	m := Controller{Svc: svc, app: app}
 
-	app.Post("/", m.Auth)
+	app.Post("/", m.Entity)
 
 }
