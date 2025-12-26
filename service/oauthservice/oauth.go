@@ -2,7 +2,6 @@ package oauthservice
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -48,13 +47,13 @@ func NewOAuthService() *OAuthService {
 
 // متد دریافت URL گوگل با redirect URL داینامیک
 func (s *OAuthService) GetGoogleAuthURL(redirectURL string) string {
-	// نکته مهم: اینجا redirect URL را برای این درخواست خاص ست می‌کنیم
+
 	url := s.googleConfig.AuthCodeURL("state", oauth2.SetAuthURLParam("redirect_uri", redirectURL))
 	return url
 }
 
 func (s *OAuthService) GetGithubAuthURL(redirectURL string) string {
-	// نکته مهم: اینجا redirect URL را برای این درخواست خاص ست می‌کنیم
+
 	url := s.githubConfig.AuthCodeURL("state", oauth2.SetAuthURLParam("redirect_uri", redirectURL))
 	return url
 }
@@ -71,6 +70,7 @@ func (s *OAuthService) ExchangeGoogleCode(ctx context.Context, code string) (*oa
 
 func (s *OAuthService) ExchangeGithubCode(ctx context.Context, code string) (*oauth2.Token, error) {
 	// اینجا نیازی به ست کردن Redirect URL نیست مگر اینکه پورت عوض شده باشد (که معمولا برای Exchange نیازی نیست اگر همان باشد)
+
 	token, err := s.githubConfig.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (s *OAuthService) ExchangeGithubCode(ctx context.Context, code string) (*oa
 }
 
 // متد دریافت پروفایل کاربر با توکن
-func (s *OAuthService) GetGoogleUserInfo(token string) (map[string]interface{}, error) {
+func (s *OAuthService) GetGoogleUserInfo(token string) ([]byte, error) {
 	client := s.googleConfig.Client(
 		context.Background(),
 		&oauth2.Token{AccessToken: token},
@@ -96,16 +96,16 @@ func (s *OAuthService) GetGoogleUserInfo(token string) (map[string]interface{}, 
 		return nil, fmt.Errorf("google userinfo failed: %s", body)
 	}
 
-	var user map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+	data, err := io.ReadAll(resp.Body)
+
+	if err != nil {
 		return nil, err
 	}
-
-	return user, nil
+	return data, nil
 }
 
 // متد دریافت پروفایل کاربر با توکن (مخصوص گیت‌هاب)
-func (s *OAuthService) GetGitHubUserInfo(token string) (map[string]interface{}, error) {
+func (s *OAuthService) GetGitHubUserInfo(token string) ([]byte, error) {
 	// 1. ساخت یک کلاینت استاندارد هتپ
 	client := &http.Client{}
 
@@ -132,11 +132,47 @@ func (s *OAuthService) GetGitHubUserInfo(token string) (map[string]interface{}, 
 		return nil, fmt.Errorf("github API returned status: %d", resp.StatusCode)
 	}
 
-	// 6. پارس کردن JSON
-	var user map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+	data, err := io.ReadAll(resp.Body)
+
+	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return data, nil
+}
+
+func (s *OAuthService) GetGitHubUserEmail(token string) ([]byte, error) {
+	// 1. ساخت یک کلاینت استاندارد هتپ
+	client := &http.Client{}
+
+	// 2. ساخت درخواست به آدرس API گیت‌هاب
+	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. تنظیم هدر Authorization
+	// فرمت هدر گیت‌هاب به صورت "Bearer YOUR_TOKEN" است
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Set("Accept", "application/json") // اطمینان از اینکه JSON دریافت می‌کنیم
+
+	// 4. اجرای درخواست
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// 5. بررسی وضعیت پاسخ
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("github API returned status: %d", resp.StatusCode)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
