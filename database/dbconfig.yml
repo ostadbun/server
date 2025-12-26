@@ -1,0 +1,5 @@
+production:
+  dialect: postgres
+  datasource: gameapp:gameappt0lk2o20@(localhost:3308)/gameapp_db?parseTime=true
+  dir: database/migration
+  table: gorp_migrations

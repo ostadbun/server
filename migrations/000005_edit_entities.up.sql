@@ -1,7 +1,0 @@
-ALTER TABLE university ADD COLUMN name TEXT;
-
-ALTER TABLE student ADD COLUMN name TEXT;
-
-ALTER TABLE major ADD COLUMN name TEXT;
-
-ALTER TABLE lesson ADD COLUMN name TEXT;
