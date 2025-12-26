@@ -1,6 +1,10 @@
 package main
 
 import (
+	"ostadbun/adaptor/redisAdaptor"
+	"ostadbun/database"
+	"ostadbun/repository/userRepository"
+
 	"github.com/joho/godotenv"
 
 	"ostadbun/delivery/httpserver"
@@ -13,10 +17,14 @@ func main() {
 	if err != nil {
 		panic("error loading .env file")
 	}
-	//dbConf := database.New()
+	dbConf := database.New()
+
+	rds := redisAdaptor.New()
 
 	oauth := oauthservice.NewOAuthService()
-	userSvc := userservice.New(*oauth)
+
+	userRepo := userRepository.Make(dbConf.Conn())
+	userSvc := userservice.New(*oauth, rds, userRepo)
 
 	server := httpserver.New(userSvc)
 
