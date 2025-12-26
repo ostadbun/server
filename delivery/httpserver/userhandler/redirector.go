@@ -16,7 +16,6 @@ func (h Handler) redirector(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(fmt.Sprintf("invalid provider called: %s", provder))
 	}
 
-	fmt.Println(url)
 	return c.RedirectBack(url)
 }
 

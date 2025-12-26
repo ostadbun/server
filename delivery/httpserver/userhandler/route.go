@@ -7,6 +7,6 @@ func (h Handler) SetRoutes(e *fiber.App) {
 
 	userGroup.Get("/oauth", h.redirector)
 
-	userGroup.Get("/oauth/callback/:id", h.acceptor)
+	userGroup.Get("/oauth/callback/:provider", h.acceptor)
 
 }

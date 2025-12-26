@@ -10,12 +10,12 @@ import (
 )
 
 type Server struct {
-	userService userservice.Auth
+	userService userservice.User
 	UserHandler userhandler.Handler
 }
 
 func New(
-	userService userservice.Auth,
+	userService userservice.User,
 
 ) Server {
 	return Server{

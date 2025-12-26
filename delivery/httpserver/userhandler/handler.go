@@ -5,10 +5,10 @@ import (
 )
 
 type Handler struct {
-	authSvc userservice.Auth
+	authSvc userservice.User
 }
 
-func New(authSvc userservice.Auth) Handler {
+func New(authSvc userservice.User) Handler {
 	return Handler{
 		authSvc: authSvc,
 	}
