@@ -8,15 +8,14 @@ import (
 	_ "golang.org/x/oauth2"
 )
 
-func (r User) RedirectUrlGenerator(prov string) (string, error) {
+func (r User) RedirectUrlGenerator(prov string, info []byte) (string, error) {
 	if prov == "google" {
-		str := r.oauth.GetGoogleAuthURL("http://localhost:3000/user/oauth/callback/google")
-		return str, nil
+		return r.oauth.GetGoogleAuthURL("http://localhost:3000/user/oauth/callback/google", info)
 	}
 
 	if prov == "github" {
-		str := r.oauth.GetGithubAuthURL("http://localhost:3000/user/oauth/callback/github")
-		return str, nil
+		return r.oauth.GetGithubAuthURL("http://localhost:3000/user/oauth/callback/github", info)
+
 	}
 
 	return "", errors.New("invalid prov")
