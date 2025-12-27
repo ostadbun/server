@@ -2,7 +2,6 @@ package userservice
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"ostadbun/entity"
 	"time"
@@ -10,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r User) Login(u entity.User) (string, error) {
+func (r User) Login(u entity.User, useragent []byte) (string, error) {
 	ctx := context.Background()
 
 	userID, isExist := r.repo.ExistingCheck(u.Email)
@@ -19,43 +18,18 @@ func (r User) Login(u entity.User) (string, error) {
 	if !isExist {
 		_, err := r.repo.RegisterUser(u)
 		if err != nil {
-			return "", fmt.Errorf("redis set failed -1242312: %v", err)
+			return "", fmt.Errorf("register faild -1242312: %v", err)
 		}
-
-		newID := uuid.New().String()
-		key := fmt.Sprintf("user:%s:%s", u.Email, newID)
-
-		v, err := json.Marshal(u)
-		if err != nil {
-			return "", fmt.Errorf("marsh set failed -r1423124100023599: %v", err)
-		}
-		if err := r.redis.JSONSet(ctx, key, v, 72*time.Hour).Err(); err != nil {
-			return "", fmt.Errorf("redis set failed -912324: %v", err)
-		}
-
-		return newID, nil
-	} else {
-		keys, err := r.redis.Keys(ctx, fmt.Sprintf("user:%s:*", u.Email)).Result()
-		if err != nil {
-			return "", fmt.Errorf("redis set failed -r423423423599: %v", err)
-		}
-
-		if len(keys) > 0 {
-
-			for _, key := range keys {
-				val, _ := r.redis.Get(ctx, key).Result()
-				fmt.Println(val)
-
-			}
-
-		} else {
-			newID := uuid.New().String()
-			key := fmt.Sprintf("user:%s:%s", u.Email, newID)
-
-			if err := r.redis.JSONSet(ctx, key, u, 72*time.Hour).Err(); err != nil {
-				return "", fmt.Errorf("redis set failed -112314234: %v", err)
-			}
-		}
-		return "existing", nil
 	}
+
+	uniqueKey := uuid.New().String()
+	key := fmt.Sprintf("osbn-u-s:%s:%s", u.Email_Hashe(), uniqueKey)
+
+	if err := r.redis.Set(ctx, key, useragent, time.Hour*71).Err(); err != nil {
+		return "", fmt.Errorf("redis set faild -kdfhniu733: %v", err)
+	}
+
+	fmt.Println(string(useragent), "magma")
+
+	return uniqueKey, nil
 }
