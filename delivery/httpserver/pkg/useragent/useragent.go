@@ -1,4 +1,4 @@
-package pkg
+package useragent
 
 import (
 	"strings"
@@ -7,9 +7,14 @@ import (
 )
 
 type DeviceInfo struct {
-	Type   string // mobile | desktop
-	Client string // web | terminal
-	OS     string // android | ios | windows | mac | linux
+	// mobile | desktop
+	Type string `json:"type"`
+
+	// web | terminal
+	Client string `json:"client"`
+
+	// android | ios | windows | mac | linux
+	OS string `json:"os"`
 }
 
 func ReadDeviceInfo(c *fiber.Ctx) DeviceInfo {
