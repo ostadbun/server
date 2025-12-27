@@ -6,7 +6,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
@@ -16,10 +19,12 @@ import (
 type OAuthService struct {
 	googleConfig *oauth2.Config
 	githubConfig *oauth2.Config
+
+	redis *redis.Client
 }
 
 // تابع سازنده: تنظیمات اولیه
-func NewOAuthService() *OAuthService {
+func NewOAuthService(redis *redis.Client) *OAuthService {
 	// تنظیمات گوگل
 	googleConf := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
@@ -42,23 +47,32 @@ func NewOAuthService() *OAuthService {
 	return &OAuthService{
 		googleConfig: googleConf,
 		githubConfig: githubConf,
+		redis:        redis,
 	}
 }
 
-// متد دریافت URL گوگل با redirect URL داینامیک
-func (s *OAuthService) GetGoogleAuthURL(redirectURL string) string {
+func (s *OAuthService) GetGoogleAuthURL(redirectURL string, userdata []byte) (string, error) {
+	key, err := setToRedis(userdata, s.redis)
 
-	url := s.googleConfig.AuthCodeURL("state", oauth2.SetAuthURLParam("redirect_uri", redirectURL))
-	return url
+	if err != nil {
+		return "", err
+	}
+
+	url := s.googleConfig.AuthCodeURL(key, oauth2.SetAuthURLParam("redirect_uri", redirectURL))
+	return url, nil
 }
 
-func (s *OAuthService) GetGithubAuthURL(redirectURL string) string {
+func (s *OAuthService) GetGithubAuthURL(redirectURL string, userdata []byte) (string, error) {
 
-	url := s.githubConfig.AuthCodeURL("state", oauth2.SetAuthURLParam("redirect_uri", redirectURL))
-	return url
+	key, err := setToRedis(userdata, s.redis)
+
+	if err != nil {
+		return "", err
+	}
+	url := s.githubConfig.AuthCodeURL(key, oauth2.SetAuthURLParam("redirect_uri", redirectURL))
+	return url, nil
 }
 
-// متد تبدیل کد به توکن
 func (s *OAuthService) ExchangeGoogleCode(ctx context.Context, code string) (*oauth2.Token, error) {
 	// اینجا نیازی به ست کردن Redirect URL نیست مگر اینکه پورت عوض شده باشد (که معمولا برای Exchange نیازی نیست اگر همان باشد)
 	token, err := s.googleConfig.Exchange(ctx, code)
@@ -78,7 +92,6 @@ func (s *OAuthService) ExchangeGithubCode(ctx context.Context, code string) (*oa
 	return token, nil
 }
 
-// متد دریافت پروفایل کاربر با توکن
 func (s *OAuthService) GetGoogleUserInfo(token string) ([]byte, error) {
 	client := s.googleConfig.Client(
 		context.Background(),
@@ -104,7 +117,6 @@ func (s *OAuthService) GetGoogleUserInfo(token string) ([]byte, error) {
 	return data, nil
 }
 
-// متد دریافت پروفایل کاربر با توکن (مخصوص گیت‌هاب)
 func (s *OAuthService) GetGitHubUserInfo(token string) ([]byte, error) {
 	// 1. ساخت یک کلاینت استاندارد هتپ
 	client := &http.Client{}
@@ -175,4 +187,18 @@ func (s *OAuthService) GetGitHubUserEmail(token string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func setToRedis(userdata []byte, redis *redis.Client) (string, error) {
+	newSession := uuid.New().String()
+
+	key := fmt.Sprintf("osbn-o-auth-state:%s", newSession)
+
+	if err := redis.Set(context.Background(), key, userdata, time.Minute*6).Err(); err != nil {
+		fmt.Println(err)
+
+		return "", err
+	}
+
+	return key, nil
 }
