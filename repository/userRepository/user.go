@@ -17,24 +17,25 @@ func Make(db *sql.DB) AuthRepo {
 	}
 }
 
-func (a AuthRepo) ExistingCheck(email string) (int, bool) {
+func (a AuthRepo) ExistingCheck(email string) (int, string, bool) {
 	var id int
+	var name string
 
 	email = hash.Hasher(email)
 
 	err := a.db.QueryRow(
-		`SELECT id FROM users WHERE email = $1 LIMIT 1`,
+		`SELECT id,name FROM users WHERE email = $1 LIMIT 1`,
 		email,
-	).Scan(&id)
+	).Scan(&id, &name)
 
 	fmt.Println(email, id)
 	if err != nil {
 		fmt.Println(err.Error())
-		return 0, false
+		return 0, "", false
 
 	}
 
-	return id, id > 0
+	return id, name, id > 0
 }
 
 func (a AuthRepo) RegisterUser(user entity.User) (int, error) {
