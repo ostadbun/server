@@ -1,15 +1,10 @@
 package redisAdaptor
 
 import (
-	"time"
-
 	"github.com/redis/go-redis/v9"
 )
 
-type Redis interface {
-	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
-	Get(key string) *redis.StringCmd
-}
+
 
 func New() *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
