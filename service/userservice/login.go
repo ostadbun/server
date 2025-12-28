@@ -26,7 +26,7 @@ func (r User) Login(u entity.User, useragent []byte) (code string, name string, 
 	uniqueKey := uuid.New().String()
 	key := fmt.Sprintf("osbn-u-s:%s:%s", u.Email_Hashe(), uniqueKey)
 
-	if err := r.redis.Set(ctx, key, addUSerID(useragent, userID), time.Hour*71).Err(); err != nil {
+	if err := r.redis.Set(ctx, key, addUSerID(useragent, userID), time.Hour*24).Err(); err != nil {
 		return "", "user", fmt.Errorf("redis set faild -kdfhniu733: %v", err)
 	}
 

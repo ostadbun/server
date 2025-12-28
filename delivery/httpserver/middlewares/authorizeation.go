@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -61,10 +62,21 @@ func Auth(r *redis.Client) func(c *fiber.Ctx) error {
 				"message": fmt.Sprintf("authorization faild %v", errJSON),
 			})
 		}
-
+		ok, err := r.Expire(context.Background(), va[0], time.Hour*24).Result()
+		if err != nil {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"message": fmt.Sprintf("access denied"),
+			})
+		}
+		if !ok {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"message": fmt.Sprintf("access denied"),
+			})
+		}
 		ID := strconv.Itoa(user.Id)
 
 		c.Set("user_id", ID)
+
 		return c.Next()
 
 	}
