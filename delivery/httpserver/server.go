@@ -29,7 +29,11 @@ func (s Server) Serve() {
 
 	e := fiber.New()
 
-	e.Use(cors.New())
+	e.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:8713",
+		AllowCredentials: true,
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+	}))
 
 	s.UserHandler.SetRoutes(e)
 
