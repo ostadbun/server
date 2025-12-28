@@ -9,7 +9,7 @@ import (
 )
 
 type IRepo interface {
-	ExistingCheck(email string) (int, bool)
+	ExistingCheck(email string) (int, string, bool)
 	RegisterUser(user entity.User) (int, error)
 }
 type User struct {
