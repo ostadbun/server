@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"ostadbun/entity"
 	"ostadbun/param/userparam"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -47,15 +49,15 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			Name:  userData.Name,
 		}
 
-		code, err := h.authSvc.Login(data, userAgentData)
+		code, name, err := h.authSvc.Login(data, userAgentData)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
-		// get login jwt
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"code": code,
-		})
+
+		cookeSetter(c, code, name)
+
+		return c.Redirect(os.Getenv("WEB_CLIENT"))
 
 	case "github":
 		claim, emails, errC := h.authSvc.AcceptGithubOauth(Code)
@@ -89,17 +91,17 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			Name:  userData.Name,
 		}
 
-		code, err := h.authSvc.Login(data, userAgentData)
+		code, name, err := h.authSvc.Login(data, userAgentData)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("65asfh872r - %s", errC))
 		}
-		// get login jwt
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"code": code,
-		})
+
+		cookeSetter(c, code, name)
+		return c.Redirect(os.Getenv("WEB_CLIENT"))
 	}
 
+	// default
 	return c.SendString("end")
 }
 
@@ -120,4 +122,26 @@ func removeState(redis *redis.Client, state string) {
 		fmt.Println(err)
 		//	TODO log here
 	}
+}
+
+func cookeSetter(c *fiber.Ctx, code string, username string) {
+
+	c.Cookie(&fiber.Cookie{
+		Name:     os.Getenv("COOKIE_TOKEN"),
+		Value:    code,
+		Path:     "/",
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+		//TODO make true on production https
+		Secure:   false,
+		SameSite: fiber.CookieSameSiteLaxMode,
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:    os.Getenv("COOKIE_NAME"),
+		Value:   username,
+		Path:    "/",
+		Expires: time.Now().Add(time.Hour * 24),
+	})
+
 }
