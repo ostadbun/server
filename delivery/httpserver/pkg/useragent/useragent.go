@@ -17,7 +17,7 @@ type DeviceInfo struct {
 	OS string `json:"os"`
 }
 
-func ReadDeviceInfo(c *fiber.Ctx) DeviceInfo {
+func ReadDeviceInfo(c *fiber.Ctx, clientDATA string) DeviceInfo {
 
 	ua := strings.ToLower(c.Get("User-Agent"))
 	platform := strings.ToLower(strings.Trim(
@@ -51,6 +51,10 @@ func ReadDeviceInfo(c *fiber.Ctx) DeviceInfo {
 	device := "desktop"
 	if mobile == "?1" || strings.Contains(ua, "mobile") {
 		device = "mobile"
+	}
+
+	if len(clientDATA) > 1 {
+		client = clientDATA
 	}
 
 	return DeviceInfo{

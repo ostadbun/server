@@ -10,18 +10,21 @@ import (
 
 func (h Handler) redirector(c *fiber.Ctx) error {
 
-	provder := c.Query("provider", "")
+	provider := c.Query("provider", "")
 
-	data, err := json.Marshal(useragent.ReadDeviceInfo(c))
+	client := c.Query("client", "web")
+
+	a := useragent.ReadDeviceInfo(c, client)
+	data, err := json.Marshal(a)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	url, err := h.authSvc.RedirectUrlGenerator(provder, data)
+	url, err := h.authSvc.RedirectUrlGenerator(provider, client, data)
 
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString(fmt.Sprintf("invalid provider called: %s", provder))
+		return c.Status(fiber.StatusBadRequest).SendString(fmt.Sprintf("invalid provider called: %s", provider))
 	}
 
 	return c.RedirectBack(url)

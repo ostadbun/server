@@ -8,7 +8,8 @@ import (
 	_ "golang.org/x/oauth2"
 )
 
-func (r User) RedirectUrlGenerator(prov string, info []byte) (string, error) {
+func (r User) RedirectUrlGenerator(prov string, client string, info []byte) (string, error) {
+
 	if prov == "google" {
 		return r.oauth.GetGoogleAuthURL("http://localhost:3000/user/oauth/callback/google", info)
 	}

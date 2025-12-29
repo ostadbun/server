@@ -22,7 +22,8 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 
 	defer removeState(h.redis, state)
 
-	userAgentData, err := checkIntoRedis(state, h.redis)
+	userAgentData, client, err := checkIntoRedis(state, h.redis)
+	fmt.Println(Code, state, "this:", client, "check it out")
 	fmt.Println(string(userAgentData), err, "magmawei")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -55,9 +56,11 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 		}
 
-		cookeSetter(c, code, name)
-
-		return c.Redirect(os.Getenv("WEB_CLIENT"))
+		if client == "cli" {
+			return c.Redirect(cliRedirectString(code))
+		} else {
+			cookeSetter(c, code, name)
+		}
 
 	case "github":
 		claim, emails, errC := h.authSvc.AcceptGithubOauth(Code)
@@ -97,23 +100,47 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("65asfh872r - %s", errC))
 		}
 
-		cookeSetter(c, code, name)
-		return c.Redirect(os.Getenv("WEB_CLIENT"))
+		if client == "cli" {
+			return c.Redirect(cliRedirectString(code))
+		} else {
+			cookeSetter(c, code, name)
+		}
+
+	default:
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err,
+		})
 	}
 
-	// default
-	return c.SendString("end")
+	return c.Redirect(os.Getenv("WEB_CLIENT"))
 }
 
-func checkIntoRedis(key string, rds *redis.Client) ([]byte, error) {
+type DeviceInfo struct {
+	// mobile | desktop
+	Type string `json:"type"`
 
-	rs, err := rds.Get(context.Background(), key).Result()
+	// web | terminal
+	Client string `json:"client"`
 
-	if err != nil {
-		return nil, err
+	// android | ios | windows | mac | linux
+	OS string `json:"os"`
+}
+
+func checkIntoRedis(key string, rds *redis.Client) ([]byte, string, error) {
+
+	rs, errR := rds.Get(context.Background(), key).Result()
+
+	if errR != nil {
+		return nil, "", errR
 	}
 
-	return []byte(rs), nil
+	var data DeviceInfo
+
+	if err := json.Unmarshal([]byte(rs), &data); err != nil {
+		return nil, "", err
+	}
+
+	return []byte(rs), data.Client, nil
 
 }
 
@@ -144,4 +171,9 @@ func cookeSetter(c *fiber.Ctx, code string, username string) {
 		Expires: time.Now().Add(time.Hour * 24),
 	})
 
+}
+
+func cliRedirectString(c string) string {
+
+	return os.Getenv("CLI_CLIENT") + "?code=" + c
 }
