@@ -75,8 +75,9 @@ func Auth(r *redis.Client) func(c *fiber.Ctx) error {
 		}
 		ID := strconv.Itoa(user.Id)
 
-		c.Set("user_id", ID)
+		c.Locals("user_id", ID)
 
+		fmt.Println("1323", ID)
 		return c.Next()
 
 	}

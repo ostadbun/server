@@ -11,6 +11,7 @@ import (
 type IRepo interface {
 	ExistingCheck(email string) (int, string, bool)
 	RegisterUser(user entity.User) (int, error)
+	AdminByWho(userID string) (int, error)
 }
 type User struct {
 	oauth oauthservice.OAuthService

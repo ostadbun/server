@@ -14,19 +14,22 @@ func (r User) Login(u entity.User, useragent []byte) (code string, name string, 
 	ctx := context.Background()
 
 	userID, username, isExist := r.repo.ExistingCheck(u.Email)
-	fmt.Println(isExist, userID)
+	fmt.Println(isExist, userID, u.Email, "sa7hf83i72i73e")
 
+	var MainUserID int
 	if !isExist {
-		_, err := r.repo.RegisterUser(u)
+		MainUserID, err = r.repo.RegisterUser(u)
 		if err != nil {
 			return "", "user", fmt.Errorf("register faild -1242312: %v", err)
 		}
+	} else {
+		MainUserID = userID
 	}
 
 	uniqueKey := uuid.New().String()
 	key := fmt.Sprintf("osbn-u-s:%s:%s", u.Email_Hashe(), uniqueKey)
 
-	if err := r.redis.Set(ctx, key, addUSerID(useragent, userID), time.Hour*24).Err(); err != nil {
+	if err := r.redis.Set(ctx, key, addUSerID(useragent, MainUserID), time.Hour*24).Err(); err != nil {
 		return "", "user", fmt.Errorf("redis set faild -kdfhniu733: %v", err)
 	}
 
