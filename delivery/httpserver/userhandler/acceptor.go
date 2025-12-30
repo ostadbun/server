@@ -15,14 +15,21 @@ import (
 
 func (h Handler) acceptor(c *fiber.Ctx) error {
 
+	//1) on priority first i give state for remove user state from redis
+	state := c.Query("state")
+	defer removeState(h.redis, state)
+
+	//2) now check the error query is empty or not
+	errorURL := c.Query("error")
+	if errorURL != "" {
+		return c.Redirect(os.Getenv("WEB_CLIENT") + "/acceptor?error=" + errorURL)
+	}
+
 	ProviderName := c.Params("provider")
 	Code := c.Query("code")
 
-	state := c.Query("state")
-
-	defer removeState(h.redis, state)
-
 	userAgentData, client, err := checkIntoRedis(state, h.redis)
+
 	fmt.Println(Code, state, "this:", client, "check it out")
 	fmt.Println(string(userAgentData), err, "magmawei")
 	if err != nil {
@@ -31,12 +38,14 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 		})
 	}
 
+	// provider client
+
 	switch ProviderName {
 
 	case "google":
 		claim, errC := h.authSvc.AcceptGoogleOauth(Code)
-		var userData userparam.Google
 
+		var userData userparam.Google
 		if errC != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("656634734576 - %s", errC))
 		}

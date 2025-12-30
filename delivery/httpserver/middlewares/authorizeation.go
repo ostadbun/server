@@ -22,7 +22,7 @@ func Auth(r *redis.Client) func(c *fiber.Ctx) error {
 		fmt.Println(token)
 		if len(token) < 10 {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": "token required",
+				"message": "access denied",
 			})
 		}
 
