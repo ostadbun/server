@@ -1,0 +1,139 @@
+Table university {
+  id serial [pk]
+  wiki json
+
+}
+
+Table student {
+  id serial [pk]
+  wiki json
+  admined_by_ID nullint
+  universityID int
+}
+
+Table professor {
+  id serial [pk]
+  name text
+  start_year int
+  education_history text
+}
+
+Table lesson {
+  id serial [pk]
+  wiki json
+}
+
+Table major {
+  id serial [pk]
+  wiki json
+}
+
+
+-----  main entities depends
+
+Table Prerequisite {
+  id serial [pk]
+  wiki json
+  PrerequisiteID int
+  lessonID int
+}
+
+Table co_requisiteID {
+  id serial [pk]
+  wiki json
+  PrerequisiteID int
+  lessonID int
+}
+
+
+Table major_university{
+  id serial [pk]
+  universityID int
+  majorID int
+}
+
+Table profesor_university {
+  id serial [pk]
+  professorID int
+  universityID int
+}
+
+
+Table proffesor_lessons {
+  id serial [pk]
+  professorID int
+  lessonID int
+}
+
+Table proffesor_student {
+  id serial [pk]
+  professorID int
+  studentID int
+}
+
+
+Table passed_lesson_proffesor_student {
+  id serial [pk]
+  studentID int
+  professorID int
+  lessonID int
+  semester smallint
+  universityID int
+}
+
+
+Table lesson_major {
+  id serial [pk]
+  majorID int
+  lessonID int
+  wiki json
+}
+------ under here vore entities
+
+
+
+Table options {
+  id serial [pk]
+  name text
+  weight smallint
+  targetTable enum('univ','prof')
+  targetID int
+}
+
+
+Table vote {
+  id serial [pk]
+  studentID int
+  optionID int
+  rate smallint
+  time int
+}
+
+Table vote_snapshot {
+  id serial [pk]
+  student_sum int
+  vote_sum int
+  optionID int
+  rate_at_this_time smallint
+  time int
+}
+
+
+
+
+----- activity
+
+
+Table user_activity_history {
+  id serial [pk]
+  studentID int
+  activityID int
+  time int
+}
+
+Table activity_value {
+  id serial [pk]
+  name string
+  wiki json
+  value int
+}
