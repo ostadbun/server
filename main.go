@@ -21,10 +21,9 @@ func main() {
 
 	rds := redisAdaptor.New()
 
-
 	oauth := oauthservice.NewOAuthService(rds)
 
-	userRepo := userRepository.Make(dbConf.Conn())
+	userRepo := userRepository.New(dbConf)
 	userSvc := userservice.New(*oauth, rds, userRepo)
 
 	server := httpserver.New(userSvc, rds)

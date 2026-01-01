@@ -13,6 +13,8 @@ func (h Handler) SetRoutes(e *fiber.App) {
 
 	userGroup.Get("/oauth/callback/:provider", h.acceptor)
 
+	userGroup.Get("/switch-permission/:userid", middlewares.Auth(h.redis), middlewares.IsAdmin(h.authSvc), h.switchPermission)
+
 	userGroup.Get("/ow", middlewares.Auth(h.redis), middlewares.IsAdmin(h.authSvc), test)
 
 }
