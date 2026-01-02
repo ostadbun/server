@@ -4,6 +4,7 @@ import (
 	"ostadbun/adaptor/redisAdaptor"
 	"ostadbun/database"
 	"ostadbun/repository/activityRepository"
+	"ostadbun/repository/manipulationRepository"
 	"ostadbun/repository/userRepository"
 	"ostadbun/service/activityService"
 
@@ -33,7 +34,8 @@ func main() {
 	userRepo := userRepository.New(dbConf)
 	userSvc := userservice.New(*oauth, activSvc, rds, userRepo)
 
-	maniSVC := manipulationService.New(activSvc)
+	maniRepo := manipulationRepository.New(dbConf)
+	maniSVC := manipulationService.New(activSvc, *maniRepo)
 
 	server := httpserver.New(userSvc, rds, activSvc, maniSVC)
 
