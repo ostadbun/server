@@ -3,7 +3,7 @@ package userhandler
 import (
 	"encoding/json"
 	"fmt"
-	"ostadbun/delivery/httpserver/pkg/useragent"
+	"ostadbun/pkg/useragent"
 
 	"github.com/gofiber/fiber/v2"
 )
