@@ -18,9 +18,11 @@ func (r User) Login(u entity.User, useragent []byte) (code string, name string, 
 
 	var MainUserID int
 	if !isExist {
+		
 		MainUserID, err = r.repo.RegisterUser(u)
+
 		if err != nil {
-			return "", "user", fmt.Errorf("register faild -1242312: %v", err)
+			return "", "", fmt.Errorf("register faild -1242312: %v", err)
 		}
 	} else {
 		MainUserID = userID

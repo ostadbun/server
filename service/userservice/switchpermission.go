@@ -1,8 +1,7 @@
 package userservice
 
-func (r User) SwitchPermission(userID, masterId int) error {
+func (r User) SwitchPermission(userID, masterId int) (bool, error) {
 
-	_, err := r.repo.SwitchPermission(userID, masterId)
+	return r.repo.SwitchPermission(userID, masterId)
 
-	return err
 }

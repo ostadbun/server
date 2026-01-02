@@ -2,6 +2,7 @@ package userhandler
 
 import (
 	"fmt"
+	"ostadbun/service/activity/activityconstants"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -27,11 +28,23 @@ func (h Handler) switchPermission(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("masterID not found wdaij")
 	}
 
-	err := h.authSvc.SwitchPermission(userId, masterID)
+	isAdminNow, errSwitch := h.authSvc.SwitchPermission(userId, masterID)
 
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(err.Error())
+	if errSwitch != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(errSwitch.Error())
 	}
+
+	var triggerErr error
+	if isAdminNow {
+		triggerErr = h.authSvc.ActivityTrigger(masterID, activityconstants.Trigger_UnMakeAdmin)
+	} else {
+		triggerErr = h.authSvc.ActivityTrigger(masterID, activityconstants.Trigger_MakeAdmin)
+	}
+
+	fmt.Println(triggerErr)
+	//if triggerErr != nil {
+	//	return c.Status(fiber.StatusInternalServerError).SendString(triggerErr.Error())
+	//}
 
 	return c.Render("user/switchPermission", fiber.Map{})
 }

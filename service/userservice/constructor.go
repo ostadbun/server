@@ -2,28 +2,33 @@ package userservice
 
 //type IRepo = userRepository.AuthRepo
 import (
-	"ostadbun/entity"
+	"ostadbun/repository/userRepository"
+	"ostadbun/service/activity"
+
 	"ostadbun/service/oauthservice"
 
 	"github.com/redis/go-redis/v9"
 )
 
-type IRepo interface {
-	ExistingCheck(email string) (int, string, bool)
-	RegisterUser(user entity.User) (int, error)
-	AdminByWho(userID string) (int, error)
-	SwitchPermission(userID int, masterID int) (int, error)
-}
+//type IRepo interface {
+//	ExistingCheck(email string) (int, string, bool)
+//	RegisterUser(user entity.User) (int, error)
+//	AdminByWho(userID string) (int, error)
+//	SwitchPermission(userID int, masterID int) (bool, error)
+//}
+
 type User struct {
-	oauth oauthservice.OAuthService
-	repo  IRepo
-	redis *redis.Client
+	oauth    oauthservice.OAuthService
+	activity activityService.Activity
+	repo     *userRepository.DB
+	redis    *redis.Client
 }
 
-func New(oauth oauthservice.OAuthService, redis *redis.Client, repo IRepo) User {
+func New(oauth oauthservice.OAuthService, activity activityService.Activity, redis *redis.Client, repo *userRepository.DB) User {
 	return User{
-		oauth: oauth,
-		redis: redis,
-		repo:  repo,
+		oauth:    oauth,
+		activity: activity,
+		redis:    redis,
+		repo:     repo,
 	}
 }
