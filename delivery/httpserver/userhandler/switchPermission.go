@@ -2,7 +2,8 @@ package userhandler
 
 import (
 	"fmt"
-	"ostadbun/service/activity/activityconstants"
+	Activityconstants "ostadbun/pkg/constants"
+
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -36,15 +37,23 @@ func (h Handler) switchPermission(c *fiber.Ctx) error {
 
 	var triggerErr error
 	if isAdminNow {
-		triggerErr = h.authSvc.ActivityTrigger(masterID, activityconstants.Trigger_UnMakeAdmin)
+		triggerErr = h.activitySvc.Trigger(masterID, Activityconstants.Trigger_UnMakeAdmin)
 	} else {
-		triggerErr = h.authSvc.ActivityTrigger(masterID, activityconstants.Trigger_MakeAdmin)
+		triggerErr = h.activitySvc.Trigger(masterID, Activityconstants.Trigger_MakeAdmin)
 	}
 
-	fmt.Println(triggerErr)
-	//if triggerErr != nil {
-	//	return c.Status(fiber.StatusInternalServerError).SendString(triggerErr.Error())
-	//}
+	if triggerErr != nil {
+		//TODO log here
+		fmt.Println(triggerErr.Error())
+	}
 
-	return c.Render("user/switchPermission", fiber.Map{})
+	return c.SendString(msg(isAdminNow))
+}
+
+func msg(a bool) string {
+	if a {
+		return "Converted to admin"
+	} else {
+		return "Converted to user"
+	}
 }

@@ -3,19 +3,13 @@ package userservice
 //type IRepo = userRepository.AuthRepo
 import (
 	"ostadbun/repository/userRepository"
-	"ostadbun/service/activity"
+
+	"ostadbun/service/activityService"
 
 	"ostadbun/service/oauthservice"
 
 	"github.com/redis/go-redis/v9"
 )
-
-//type IRepo interface {
-//	ExistingCheck(email string) (int, string, bool)
-//	RegisterUser(user entity.User) (int, error)
-//	AdminByWho(userID string) (int, error)
-//	SwitchPermission(userID int, masterID int) (bool, error)
-//}
 
 type User struct {
 	oauth    oauthservice.OAuthService

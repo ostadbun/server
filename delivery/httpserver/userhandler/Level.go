@@ -2,15 +2,24 @@ package userhandler
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func (h Handler) Level(c *fiber.Ctx) error {
 
-	UserID := c.Params("userid")
+	usId := c.Params("userid")
 
-	number, errE := h.authSvc.LevelCalculator(UserID)
+	UserID, err := strconv.Atoi(usId)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "invalid user id",
+		})
+	}
+
+	number, errE := h.activitySvc.LevelCalculator(UserID)
 
 	if errE != nil {
 		return c.SendString(errE.Error())

@@ -5,7 +5,9 @@ import (
 	"ostadbun/database"
 	"ostadbun/repository/activityRepository"
 	"ostadbun/repository/userRepository"
-	activityService "ostadbun/service/activity"
+	"ostadbun/service/activityService"
+
+	"ostadbun/service/manipulationService"
 
 	"github.com/joho/godotenv"
 
@@ -31,7 +33,9 @@ func main() {
 	userRepo := userRepository.New(dbConf)
 	userSvc := userservice.New(*oauth, activSvc, rds, userRepo)
 
-	server := httpserver.New(userSvc, rds)
+	maniSVC := manipulationService.New(activSvc)
+
+	server := httpserver.New(userSvc, rds, activSvc, maniSVC)
 
 	server.Serve()
 

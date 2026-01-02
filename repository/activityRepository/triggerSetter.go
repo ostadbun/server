@@ -2,10 +2,10 @@ package activityRepository
 
 import (
 	"fmt"
-	"ostadbun/service/activity/activityconstants"
+	"ostadbun/pkg/constants"
 )
 
-func (d DB) TriggerSetter(userid int, activity activityconstants.ActivityTriggersName) error {
+func (d DB) TriggerSetter(userid int, activity Activityconstants.ActivityTriggersName) error {
 	// کوئری را در یک خط ترکیب می‌کنیم:
 	// آی‌دی مربوط به آن activity را پیدا کن و در جدول history درج کن
 	query := `

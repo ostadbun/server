@@ -1,6 +1,5 @@
 package activityService
 
-//type IRepo = userRepository.AuthRepo
 import (
 	"ostadbun/repository/activityRepository"
 )

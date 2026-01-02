@@ -2,7 +2,10 @@ package httpserver
 
 import (
 	"fmt"
+	"ostadbun/delivery/httpserver/manipulation"
 	"ostadbun/delivery/httpserver/userhandler"
+	"ostadbun/service/activityService"
+	"ostadbun/service/manipulationService"
 	"ostadbun/service/userservice"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,17 +14,24 @@ import (
 )
 
 type Server struct {
-	userService userservice.User
-	UserHandler userhandler.Handler
+	userService    userservice.User
+	manipulService manipulationService.Manipulation
+
+	UserHandler         userhandler.Handler
+	manipulationHanlder manipulation.Handler
 }
 
 func New(
 	userService userservice.User,
 	redis *redis.Client,
+	activity activityService.Activity,
+	manipulService manipulationService.Manipulation,
 ) Server {
 	return Server{
-		UserHandler: userhandler.New(userService, redis),
-		userService: userService,
+		userService:         userService,
+		manipulService:      manipulService,
+		UserHandler:         userhandler.New(userService, activity, redis),
+		manipulationHanlder: manipulation.New(redis, manipulService),
 	}
 }
 
@@ -36,6 +46,7 @@ func (s Server) Serve() {
 	}))
 
 	s.UserHandler.SetRoutes(e)
+	s.manipulationHanlder.SetRoutes(e)
 
 	routes := e.Stack()
 
