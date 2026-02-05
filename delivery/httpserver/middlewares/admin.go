@@ -33,7 +33,7 @@ func IsAdmin(usv userservice.User) func(c *fiber.Ctx) error {
 		}
 
 		errDB := usv.AdminChecker(userID)
-
+		
 		if errDB != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"error":        "Unauthorized",

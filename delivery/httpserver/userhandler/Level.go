@@ -19,7 +19,7 @@ func (h Handler) Level(c *fiber.Ctx) error {
 		})
 	}
 
-	number, errE := h.activitySvc.LevelCalculator(UserID)
+	number, errE := h.activitySvc.LevelCalculator(c.Context(), UserID)
 
 	if errE != nil {
 		return c.SendString(errE.Error())

@@ -1,11 +1,14 @@
 package activityService
 
-import "ostadbun/pkg/constants"
+import (
+	"context"
+	"ostadbun/pkg/constants"
+)
 
-func (a Activity) Trigger(userid int, activity Activityconstants.ActivityTriggersName) error {
+func (a Activity) Trigger(ctx context.Context, userid int, activity Activityconstants.ActivityTriggersName) error {
 
 	defer func() {
-		errC := a.UpdateRedisCash(userid)
+		errC := a.UpdateRedisCash(ctx, userid)
 		if errC != nil {
 			//TODO log here
 		}

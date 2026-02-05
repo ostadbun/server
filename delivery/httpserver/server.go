@@ -10,7 +10,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
@@ -23,15 +22,14 @@ type Server struct {
 
 func New(
 	userService userservice.User,
-	redis *redis.Client,
 	activity activityService.Activity,
 	manipulService manipulationService.Manipulation,
 ) Server {
 	return Server{
 		userService:         userService,
 		manipulService:      manipulService,
-		UserHandler:         userhandler.New(userService, activity, redis),
-		manipulationHanlder: manipulation.New(redis, manipulService),
+		UserHandler:         userhandler.New(userService, activity),
+		manipulationHanlder: manipulation.New(manipulService, userService),
 	}
 }
 

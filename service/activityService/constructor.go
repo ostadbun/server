@@ -1,15 +1,23 @@
 package activityService
 
 import (
-	"ostadbun/repository/activityRepository"
+	"context"
+	"ostadbun/repository/postgres/activityRepository"
 )
 
-type Activity struct {
-	repo *activityRepository.DB
+type RedisActivity interface {
+	Check(ctx context.Context, userid int) (int, error)
+	Set(ctx context.Context, userid, level int) error
 }
 
-func New(repo *activityRepository.DB) Activity {
+type Activity struct {
+	repo  *activityRepository.DB
+	redis RedisActivity
+}
+
+func New(repo *activityRepository.DB, redis RedisActivity) Activity {
 	return Activity{
-		repo: repo,
+		repo:  repo,
+		redis: redis,
 	}
 }

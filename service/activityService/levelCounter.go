@@ -12,9 +12,9 @@ import (
 
 //3) if not exist calculate and set on redis then pass that
 
-func (a Activity) LevelCalculator(userid int) (int, error) {
+func (a Activity) LevelCalculator(ctx context.Context, userid int) (int, error) {
 
-	LevelCounted, errRedis := a.repo.GetUserLevel(context.Background(), userid)
+	LevelCounted, errRedis := a.redis.Check(ctx, userid)
 	//TODO log Redis Error
 	if errors.Is(errRedis, nil) && LevelCounted > -1 {
 		fmt.Println("LevelCounted rds", LevelCounted)
@@ -25,7 +25,7 @@ func (a Activity) LevelCalculator(userid int) (int, error) {
 	//TODO log postgres Error
 	if errors.Is(ErrPsg, nil) && MainlevelCounted > -1 {
 		fmt.Println("LevelCounted psql", MainlevelCounted)
-		SetNewToRedis := a.repo.SetUserLevelIntRedis(context.Background(), userid, MainlevelCounted)
+		SetNewToRedis := a.redis.Set(ctx, userid, MainlevelCounted)
 		if SetNewToRedis != nil {
 			//TODO log this
 			fmt.Println("SetNewToRedis", SetNewToRedis)

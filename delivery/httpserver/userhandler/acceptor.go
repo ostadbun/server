@@ -1,7 +1,6 @@
 package userhandler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,14 +9,14 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 )
 
 func (h Handler) acceptor(c *fiber.Ctx) error {
 
-	//1) on priority first i give state for remove user state from redis
+	//1) on priority first I give state for remove user state from redis
 	state := c.Query("state")
-	defer removeState(h.redis, state)
+
+	defer h.userSvc.RemoveState(c.Context(), state)
 
 	//2) now check the error query is empty or not
 	errorURL := c.Query("error")
@@ -28,10 +27,11 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 	ProviderName := c.Params("provider")
 	Code := c.Query("code")
 
-	userAgentData, client, err := checkIntoRedis(state, h.redis)
+	userAgentData, client, err := h.userSvc.CheckIntiRedis(c.Context(), state)
 
 	fmt.Println(Code, state, "this:", client, "check it out")
 	fmt.Println(string(userAgentData), err, "magmawei")
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err,
@@ -43,7 +43,7 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 	switch ProviderName {
 
 	case "google":
-		claim, errC := h.authSvc.AcceptGoogleOauth(Code)
+		claim, errC := h.userSvc.AcceptGoogleOauth(Code)
 
 		var userData userparam.Google
 		if errC != nil {
@@ -59,7 +59,7 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			Name:  userData.Name,
 		}
 
-		code, name, err := h.authSvc.Login(data, userAgentData)
+		code, name, err := h.userSvc.Login(data, userAgentData)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
@@ -72,7 +72,7 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 		}
 
 	case "github":
-		claim, emails, errC := h.authSvc.AcceptGithubOauth(Code)
+		claim, emails, errC := h.userSvc.AcceptGithubOauth(Code)
 		var userData userparam.Github
 
 		if errC != nil {
@@ -103,7 +103,7 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 			Name:  userData.Name,
 		}
 
-		code, name, err := h.authSvc.Login(data, userAgentData)
+		code, name, err := h.userSvc.Login(data, userAgentData)
 
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("65asfh872r - %s", errC))
@@ -122,42 +122,6 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 	}
 
 	return c.Redirect(os.Getenv("WEB_CLIENT"))
-}
-
-type DeviceInfo struct {
-	// mobile | desktop
-	Type string `json:"type"`
-
-	// web | terminal
-	Client string `json:"client"`
-
-	// android | ios | windows | mac | linux
-	OS string `json:"os"`
-}
-
-func checkIntoRedis(key string, rds *redis.Client) ([]byte, string, error) {
-
-	rs, errR := rds.Get(context.Background(), key).Result()
-
-	if errR != nil {
-		return nil, "", errR
-	}
-
-	var data DeviceInfo
-
-	if err := json.Unmarshal([]byte(rs), &data); err != nil {
-		return nil, "", err
-	}
-
-	return []byte(rs), data.Client, nil
-
-}
-
-func removeState(redis *redis.Client, state string) {
-	if err := redis.Del(context.Background(), state).Err(); err != nil {
-		fmt.Println(err)
-		//	TODO log here
-	}
 }
 
 func cookeSetter(c *fiber.Ctx, code string, username string) {

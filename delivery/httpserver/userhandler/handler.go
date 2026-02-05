@@ -4,21 +4,17 @@ import (
 	"database/sql"
 	"ostadbun/service/activityService"
 	"ostadbun/service/userservice"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type Handler struct {
-	authSvc     userservice.User
+	userSvc     userservice.User
 	activitySvc activityService.Activity
-	redis       *redis.Client
 	db          *sql.DB
 }
 
-func New(authSvc userservice.User, activitySvc activityService.Activity, redis *redis.Client) Handler {
+func New(userSvc userservice.User, activitySvc activityService.Activity) Handler {
 	return Handler{
-		authSvc:     authSvc,
-		redis:       redis,
+		userSvc:     userSvc,
 		activitySvc: activitySvc,
 	}
 }

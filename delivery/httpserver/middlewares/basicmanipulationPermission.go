@@ -19,7 +19,7 @@ func ManipulationPermission(m manipulation.Manipulation) func(c *fiber.Ctx) erro
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": Err.Error()})
 		}
 
-		level, errG := m.GetUserLevel(userId)
+		level, errG := m.GetUserLevel(c.Context(), userId)
 
 		if errG != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(errG.Error())

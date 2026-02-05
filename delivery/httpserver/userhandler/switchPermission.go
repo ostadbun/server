@@ -29,7 +29,7 @@ func (h Handler) switchPermission(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).SendString("masterID not found wdaij")
 	}
 
-	isAdminNow, errSwitch := h.authSvc.SwitchPermission(userId, masterID)
+	isAdminNow, errSwitch := h.userSvc.SwitchPermission(userId, masterID)
 
 	if errSwitch != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(errSwitch.Error())
@@ -37,9 +37,9 @@ func (h Handler) switchPermission(c *fiber.Ctx) error {
 
 	var triggerErr error
 	if isAdminNow {
-		triggerErr = h.activitySvc.Trigger(masterID, Activityconstants.Trigger_UnMakeAdmin)
+		triggerErr = h.activitySvc.Trigger(c.Context(), masterID, Activityconstants.Trigger_UnMakeAdmin)
 	} else {
-		triggerErr = h.activitySvc.Trigger(masterID, Activityconstants.Trigger_MakeAdmin)
+		triggerErr = h.activitySvc.Trigger(c.Context(), masterID, Activityconstants.Trigger_MakeAdmin)
 	}
 
 	if triggerErr != nil {

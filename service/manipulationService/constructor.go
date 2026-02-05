@@ -2,7 +2,7 @@ package manipulationService
 
 //type IRepo = userRepository.AuthRepo
 import (
-	"ostadbun/repository/manipulationRepository"
+	"ostadbun/repository/postgres/manipulationRepository"
 	"ostadbun/service/activityService"
 )
 

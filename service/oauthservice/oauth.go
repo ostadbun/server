@@ -6,25 +6,26 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
 )
+
+type Oauthrepo interface {
+	Set(ctx context.Context, userdata []byte) (string, error)
+}
 
 // ساختار تنظیمات اواث
 type OAuthService struct {
 	googleConfig *oauth2.Config
 	githubConfig *oauth2.Config
 
-	redis *redis.Client
+	redis Oauthrepo
 }
 
 // تابع سازنده: تنظیمات اولیه
-func NewOAuthService(redis *redis.Client) *OAuthService {
+func NewOAuthService(redis Oauthrepo) *OAuthService {
 	// تنظیمات گوگل
 	googleConf := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
@@ -52,7 +53,7 @@ func NewOAuthService(redis *redis.Client) *OAuthService {
 }
 
 func (s *OAuthService) GetGoogleAuthURL(redirectURL string, userdata []byte) (string, error) {
-	key, err := setToRedis(userdata, s.redis)
+	key, err := s.redis.Set(context.Background(), userdata)
 
 	if err != nil {
 		return "", err
@@ -64,7 +65,7 @@ func (s *OAuthService) GetGoogleAuthURL(redirectURL string, userdata []byte) (st
 
 func (s *OAuthService) GetGithubAuthURL(redirectURL string, userdata []byte) (string, error) {
 
-	key, err := setToRedis(userdata, s.redis)
+	key, err := s.redis.Set(context.Background(), userdata)
 
 	if err != nil {
 		return "", err
@@ -187,18 +188,4 @@ func (s *OAuthService) GetGitHubUserEmail(token string) ([]byte, error) {
 	}
 
 	return data, nil
-}
-
-func setToRedis(userdata []byte, redis *redis.Client) (string, error) {
-	newSession := uuid.New().String()
-
-	key := fmt.Sprintf("osbn-o-auth-state:%s", newSession)
-
-	if err := redis.Set(context.Background(), key, userdata, time.Minute*6).Err(); err != nil {
-		fmt.Println(err)
-
-		return "", err
-	}
-
-	return key, nil
 }

@@ -3,9 +3,12 @@ package main
 import (
 	"ostadbun/adaptor/redisAdaptor"
 	"ostadbun/database"
-	"ostadbun/repository/activityRepository"
-	"ostadbun/repository/manipulationRepository"
-	"ostadbun/repository/userRepository"
+	"ostadbun/repository/postgres/activityRepository"
+	"ostadbun/repository/postgres/manipulationRepository"
+	"ostadbun/repository/postgres/userRepository"
+	"ostadbun/repository/redis/redisActivity"
+	"ostadbun/repository/redis/redisOauth"
+	"ostadbun/repository/redis/redisUser"
 	"ostadbun/service/activityService"
 
 	"ostadbun/service/manipulationService"
@@ -24,20 +27,28 @@ func main() {
 	}
 	dbConf := database.New()
 
-	rds := redisAdaptor.New()
+	redisClient := redisAdaptor.New()
 
-	oauth := oauthservice.NewOAuthService(rds)
+	//oauth
+	Oauthrds := redisOauth.New(redisClient)
+	oauth := oauthservice.NewOAuthService(Oauthrds)
 
-	activRepo := activityRepository.New(dbConf, rds)
-	activSvc := activityService.New(activRepo)
+	//activity
+	activRds := redisActivity.New(redisClient)
+	activRepo := activityRepository.New(dbConf)
+	activSvc := activityService.New(activRepo, activRds)
 
+	//user
+	userRds := redisUser.New(redisClient)
 	userRepo := userRepository.New(dbConf)
-	userSvc := userservice.New(*oauth, activSvc, rds, userRepo)
+	userSvc := userservice.New(*oauth, activSvc, userRds, userRepo)
 
+	//manipulation
 	maniRepo := manipulationRepository.New(dbConf)
 	maniSVC := manipulationService.New(activSvc, *maniRepo)
 
-	server := httpserver.New(userSvc, rds, activSvc, maniSVC)
+	//engine
+	server := httpserver.New(userSvc, activSvc, maniSVC)
 
 	server.Serve()
 

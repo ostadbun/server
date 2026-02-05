@@ -2,12 +2,8 @@ package userservice
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"ostadbun/entity"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func (r User) Login(u entity.User, useragent []byte) (code string, name string, err error) {
@@ -18,7 +14,7 @@ func (r User) Login(u entity.User, useragent []byte) (code string, name string, 
 
 	var MainUserID int
 	if !isExist {
-		
+
 		MainUserID, err = r.repo.RegisterUser(u)
 
 		if err != nil {
@@ -28,16 +24,14 @@ func (r User) Login(u entity.User, useragent []byte) (code string, name string, 
 		MainUserID = userID
 	}
 
-	uniqueKey := uuid.New().String()
-	key := fmt.Sprintf("osbn-u-s:%s:%s", u.Email_Hashe(), uniqueKey)
+	code, _, err = r.redis.AddUserSession(ctx, u.Email_Hashe(), useragent, MainUserID)
 
-	if err := r.redis.Set(ctx, key, addUSerID(useragent, MainUserID), time.Hour*24).Err(); err != nil {
-		return "", "user", fmt.Errorf("redis set faild -kdfhniu733: %v", err)
+	if err != nil {
+		return "", "", fmt.Errorf("redis error 389wh19we13e: %v", err)
 	}
 
-	fmt.Println(string(useragent), "magma")
+	return code, username, nil
 
-	return uniqueKey, username, nil
 }
 
 type UseragentData struct {
@@ -51,22 +45,4 @@ type NewUseragentData struct {
 	Type   string `json:"type"`
 	Client string `json:"client"`
 	Os     string `json:"os"`
-}
-
-func addUSerID(user []byte, userid int) []byte {
-
-	var data UseragentData
-
-	_ = json.Unmarshal(user, &data)
-
-	Newdata := NewUseragentData{
-		Id:     userid,
-		Type:   data.Type,
-		Client: data.Client,
-		Os:     data.Os,
-	}
-
-	finalData, _ := json.Marshal(Newdata)
-
-	return finalData
 }

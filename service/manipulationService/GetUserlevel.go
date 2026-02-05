@@ -1,7 +1,9 @@
 package manipulationService
 
-func (m Manipulation) GetUserLevel(userId int) (int, error) {
+import "context"
 
-	return m.activity.LevelCalculator(userId)
+func (m Manipulation) GetUserLevel(ctx context.Context, userId int) (int, error) {
+
+	return m.activity.LevelCalculator(ctx, userId)
 
 }

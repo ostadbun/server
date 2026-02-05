@@ -2,18 +2,17 @@ package manipulation
 
 import (
 	manipulation "ostadbun/service/manipulationService"
-
-	"github.com/redis/go-redis/v9"
+	"ostadbun/service/userservice"
 )
 
 type Handler struct {
-	rds        *redis.Client
 	manipulSVC manipulation.Manipulation
+	usersvc    userservice.User
 }
 
-func New(rds *redis.Client, manipulSVC manipulation.Manipulation) Handler {
+func New(manipulSVC manipulation.Manipulation, usersvc userservice.User) Handler {
 	return Handler{
-		rds:        rds,
+		usersvc:    usersvc,
 		manipulSVC: manipulSVC,
 	}
 }

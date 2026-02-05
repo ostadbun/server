@@ -2,23 +2,28 @@ package userservice
 
 //type IRepo = userRepository.AuthRepo
 import (
-	"ostadbun/repository/userRepository"
-
+	"context"
+	"ostadbun/repository/postgres/userRepository"
 	"ostadbun/service/activityService"
 
 	"ostadbun/service/oauthservice"
-
-	"github.com/redis/go-redis/v9"
 )
+
+type RedisOauth interface {
+	AddUserSession(ctx context.Context, Email_Hashe string, useragent []byte, MainUserID int) (string, string, error)
+	AuthCheck(ctx context.Context, token string) (int, error)
+	RemoveState(ctx context.Context, state string)
+	CheckIntoRedis(ctx context.Context, key string) ([]byte, string, error)
+}
 
 type User struct {
 	oauth    oauthservice.OAuthService
 	activity activityService.Activity
 	repo     *userRepository.DB
-	redis    *redis.Client
+	redis    RedisOauth
 }
 
-func New(oauth oauthservice.OAuthService, activity activityService.Activity, redis *redis.Client, repo *userRepository.DB) User {
+func New(oauth oauthservice.OAuthService, activity activityService.Activity, redis RedisOauth, repo *userRepository.DB) User {
 	return User{
 		oauth:    oauth,
 		activity: activity,

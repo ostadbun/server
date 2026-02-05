@@ -21,7 +21,7 @@ func (h Handler) redirector(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
-	url, err := h.authSvc.RedirectUrlGenerator(provider, client, data)
+	url, err := h.userSvc.RedirectUrlGenerator(provider, client, data)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString(fmt.Sprintf("invalid provider called: %s", provider))
