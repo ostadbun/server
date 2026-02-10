@@ -38,8 +38,6 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 		})
 	}
 
-	// provider client
-
 	switch ProviderName {
 
 	case "google":
@@ -47,7 +45,7 @@ func (h Handler) acceptor(c *fiber.Ctx) error {
 
 		var userData userparam.Google
 		if errC != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("656634734576 - %s", errC))
+			return c.Status(fiber.StatusInternalServerError).SendString(fmt.Sprintf("656634134234734576 - %s", errC))
 		}
 
 		if err := json.Unmarshal(claim, &userData); err != nil {

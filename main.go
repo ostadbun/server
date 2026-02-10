@@ -3,12 +3,14 @@ package main
 import (
 	"ostadbun/adaptor/redisAdaptor"
 	"ostadbun/database"
+	"ostadbun/repository/postgres/academicRepository"
 	"ostadbun/repository/postgres/activityRepository"
 	"ostadbun/repository/postgres/manipulationRepository"
 	"ostadbun/repository/postgres/userRepository"
 	"ostadbun/repository/redis/redisActivity"
 	"ostadbun/repository/redis/redisOauth"
 	"ostadbun/repository/redis/redisUser"
+	"ostadbun/service/academicservice"
 	"ostadbun/service/activityService"
 
 	"ostadbun/service/manipulationService"
@@ -47,8 +49,12 @@ func main() {
 	maniRepo := manipulationRepository.New(dbConf)
 	maniSVC := manipulationService.New(activSvc, *maniRepo)
 
+	//academic
+	academicRepo := academicRepository.New(dbConf)
+	acaSVC := academicservice.New(*academicRepo)
+
 	//engine
-	server := httpserver.New(userSvc, activSvc, maniSVC)
+	server := httpserver.New(userSvc, activSvc, maniSVC, acaSVC)
 
 	server.Serve()
 

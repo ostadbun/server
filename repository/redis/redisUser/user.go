@@ -103,9 +103,16 @@ func (r *RedisUser) AuthCheck(ctx context.Context, token string) (int, error) {
 
 func (r *RedisUser) RemoveState(ctx context.Context, state string) {
 
-	if err := r.redis.Del(context.Background(), state).Err(); err != nil {
+	fmt.Println("removing state", state)
+
+	err := r.redis.Del(ctx, state).Err()
+
+	if err != nil {
 		fmt.Println(err)
 		//	TODO log here
+
+	} else {
+		fmt.Println("removed state 🌷", state)
 	}
 
 }

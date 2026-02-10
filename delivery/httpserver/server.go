@@ -2,8 +2,10 @@ package httpserver
 
 import (
 	"fmt"
+	"ostadbun/delivery/httpserver/academic"
 	"ostadbun/delivery/httpserver/manipulation"
 	"ostadbun/delivery/httpserver/userhandler"
+	"ostadbun/service/academicservice"
 	"ostadbun/service/activityService"
 	"ostadbun/service/manipulationService"
 	"ostadbun/service/userservice"
@@ -16,20 +18,24 @@ type Server struct {
 	userService    userservice.User
 	manipulService manipulationService.Manipulation
 
-	UserHandler         userhandler.Handler
-	manipulationHanlder manipulation.Handler
+	userHandler         userhandler.Handler
+	manipulationHandler manipulation.Handler
+	academicHandler     academic.Handler
 }
 
 func New(
 	userService userservice.User,
 	activity activityService.Activity,
 	manipulService manipulationService.Manipulation,
+	academicService academicservice.Service,
+
 ) Server {
 	return Server{
 		userService:         userService,
 		manipulService:      manipulService,
-		UserHandler:         userhandler.New(userService, activity),
-		manipulationHanlder: manipulation.New(manipulService, userService),
+		userHandler:         userhandler.New(userService, activity),
+		manipulationHandler: manipulation.New(manipulService, userService),
+		academicHandler:     academic.New(academicService),
 	}
 }
 
@@ -43,8 +49,9 @@ func (s Server) Serve() {
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 	}))
 
-	s.UserHandler.SetRoutes(e)
-	s.manipulationHanlder.SetRoutes(e)
+	s.userHandler.SetRoutes(e)
+	s.manipulationHandler.SetRoutes(e)
+	s.academicHandler.SetRoutes(e)
 
 	routes := e.Stack()
 
