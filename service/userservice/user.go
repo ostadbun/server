@@ -4,18 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	_ "golang.org/x/oauth2"
 )
 
 func (r User) RedirectUrlGenerator(prov string, client string, info []byte) (string, error) {
 
+	//redirectURL :=
+	redirectURL := func(provider string) string {
+		return fmt.Sprintf("%s/user/oauth/callback/%s", os.Getenv("SERVER_ADDRESS"), provider)
+	}
+
 	if prov == "google" {
-		return r.oauth.GetGoogleAuthURL("http://localhost:3000/user/oauth/callback/google", info)
+		return r.oauth.GetGoogleAuthURL(redirectURL("google"), info)
 	}
 
 	if prov == "github" {
-		return r.oauth.GetGithubAuthURL("http://localhost:3000/user/oauth/callback/github", info)
+		return r.oauth.GetGithubAuthURL(redirectURL("github"), info)
 
 	}
 

@@ -26,12 +26,16 @@ type OAuthService struct {
 
 // تابع سازنده: تنظیمات اولیه
 func NewOAuthService(redis Oauthrepo) *OAuthService {
+
+	redirectURL := fmt.Sprintf("%s/user/oauth/callback/google", os.Getenv("SERVER_ADDRESS"))
+
 	// تنظیمات گوگل
+
 	googleConf := &oauth2.Config{
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		// RedirectURL: در اینجا خالی می‌گذاریم چون پارت CLI داینامیک است
-		RedirectURL: "http://localhost:3000/user/oauth/callback/google",
+		RedirectURL: redirectURL,
 		Scopes:      []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
 		// استفاده از Endpoint آماده گوگل
 		Endpoint: google.Endpoint,
