@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"ostadbun/adaptor/redisAdaptor"
 	"ostadbun/database"
 	"ostadbun/repository/postgres/academicRepository"
@@ -25,7 +26,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		panic("error loading .env file")
+		fmt.Println("Error loading .env file resume and load from local env")
 	}
 	dbConf := database.New()
 
