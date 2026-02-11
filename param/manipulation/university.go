@@ -1,7 +1,6 @@
-package entity
+package manipulationParam
 
-type University struct {
-	Id                 string `json:"id"`
+type PendingUniversity struct {
 	Name               string `json:"name"`
 	NameEnglish        string `json:"name_english"`
 	City               string `json:"city"`

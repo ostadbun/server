@@ -5,7 +5,7 @@ import (
 	manipulationParam "ostadbun/param/manipulation"
 )
 
-func (d DB) AddLesson(lesson manipulationParam.Lesson, userId int) error {
+func (d DB) AddLesson(lesson manipulationParam.PendingLesson, userId int) error {
 
 	fmt.Println(lesson, userId, "aw3233")
 

@@ -44,9 +44,11 @@ func (s Server) Serve() {
 	e := fiber.New()
 
 	e.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:8713",
-		AllowCredentials: true,
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+		AllowOrigins: "*",
+		//AllowOrigins:     "https://ostadbun.tech,https://api.ostadbun.tech",
+		//AllowCredentials: true,
+		//AllowMethods: "GET,POST,PUT,DELETE",
 	}))
 
 	s.userHandler.SetRoutes(e)

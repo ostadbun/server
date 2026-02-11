@@ -9,7 +9,7 @@ import (
 
 func (h Handler) AddLesson(c *fiber.Ctx) error {
 
-	var lesson manipulationParam.Lesson
+	var lesson manipulationParam.PendingLesson
 
 	err := c.BodyParser(&lesson)
 

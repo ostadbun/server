@@ -1,6 +1,6 @@
 package manipulationParam
 
-type Lesson struct {
+type PendingLesson struct {
 	Name               string `json:"name"`
 	Description        string `json:"description"`
 	Difficulty         int    `json:"difficulty"`

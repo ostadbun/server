@@ -128,16 +128,18 @@ func cookeSetter(c *fiber.Ctx, code string, username string) {
 		Name:     os.Getenv("COOKIE_TOKEN"),
 		Value:    code,
 		Path:     "/",
+		Domain:   ".ostadbun.tech",
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
 		//TODO make true on production https
-		Secure:   false,
-		SameSite: fiber.CookieSameSiteLaxMode,
+		Secure:   true,
+		SameSite: fiber.CookieSameSiteNoneMode,
 	})
 
 	c.Cookie(&fiber.Cookie{
 		Name:    os.Getenv("COOKIE_NAME"),
 		Value:   username,
+		Domain:  ".ostadbun.tech",
 		Path:    "/",
 		Expires: time.Now().Add(time.Hour * 24),
 	})

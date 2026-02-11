@@ -6,6 +6,7 @@ import (
 
 func (h Handler) BasicPermission(c *fiber.Ctx) error {
 
-	return c.SendString("you can manipulate !  \uF179")
+	return c.SendString("you can manipulate ! ")
 
 }
+

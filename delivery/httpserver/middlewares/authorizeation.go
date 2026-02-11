@@ -5,6 +5,7 @@ import (
 	"os"
 	"ostadbun/service/userservice"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,21 +13,21 @@ import (
 func Auth(u userservice.User) func(c *fiber.Ctx) error {
 
 	return func(c *fiber.Ctx) error {
-		tkn := os.Getenv("COOKIE_TOKEN")
 
-		token := c.Cookies(tkn)
+		token, err := GetAuthToken(c)
 
 		fmt.Println(token)
-		if len(token) < 10 {
+		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"message": "access denied",
 			})
 		}
-		userID, err := u.AuthCheck(c.Context(), token)
 
+		userID, err := u.AuthCheck(c.Context(), token)
+		fmt.Println(userID, err)
 		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"message": err.Error(),
+				"message": "session not found",
 			})
 		}
 
@@ -39,6 +40,25 @@ func Auth(u userservice.User) func(c *fiber.Ctx) error {
 
 	}
 
+}
+
+func GetAuthToken(c *fiber.Ctx) (string, error) {
+	tkn := os.Getenv("COOKIE_TOKEN")
+
+	cookieToken := c.Cookies(tkn)
+
+	headerToken := c.Get("Authorization")
+
+	if cookieToken != "" {
+		return cookieToken, nil
+	}
+
+	if headerToken != "" {
+		headerToken = strings.Replace(headerToken, "Bearer ", "", 1)
+		return headerToken, nil
+	}
+
+	return "", fmt.Errorf("user not authenticated")
 }
 
 type NewUseragentData struct {
