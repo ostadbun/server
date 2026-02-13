@@ -1,0 +1,63 @@
+package notify
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+)
+
+// MessageRequest represents Bale API message structure
+type MessageRequest struct {
+	ChatID    string `json:"chat_id"`
+	Text      string `json:"text"`
+	ParseMode string `json:"parse_mode,omitempty"` // "Markdown" یا "HTML"
+}
+
+func Notify(message string) error {
+
+	botToken := os.Getenv("BALE_TOKEN")
+	chatID := os.Getenv("BALE_CHAT_ID")
+
+	// ساخت درخواست
+	msg := MessageRequest{
+		ChatID:    chatID,
+		Text:      message,
+		ParseMode: "Markdown",
+	}
+
+	// تبدیل به JSON
+	jsonData, err := json.Marshal(msg)
+	if err != nil {
+		return fmt.Errorf("خطا در ساخت JSON: %v", err)
+	}
+
+	// URL کامل ربات
+	url := "https://tapi.bale.ai/bot" + botToken + "/sendMessage"
+
+	// ارسال درخواست
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("خطا در ارسال درخواست: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// خواندن پاسخ
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("خطا در خواندن پاسخ: %v", err)
+	}
+
+	// نمایش نتیجه
+	fmt.Printf("کد وضعیت: %d\n", resp.StatusCode)
+	fmt.Printf("پاسخ سرور: %s\n", string(body))
+
+	if resp.StatusCode != 200 {
+
+		return fmt.Errorf("❌ خطا در ارسال پیام")
+	}
+
+	return nil
+}

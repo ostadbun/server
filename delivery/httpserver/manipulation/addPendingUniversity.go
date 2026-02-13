@@ -3,6 +3,7 @@ package manipulation
 import (
 	"ostadbun/entity"
 	manipulationParam "ostadbun/param/manipulation"
+	notify "ostadbun/pkg/bale/notif"
 	"ostadbun/pkg/httpstorage"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,7 +29,7 @@ func (h Handler) addPendingUniversity(c *fiber.Ctx) error {
 		})
 	}
 
-	unversityData := entity.PendingUniversity{
+	data := entity.PendingUniversity{
 		Name:               acceptData.Name,
 		NameEnglish:        acceptData.NameEnglish,
 		DescriptionEnglish: acceptData.DescriptionEnglish,
@@ -39,6 +40,12 @@ func (h Handler) addPendingUniversity(c *fiber.Ctx) error {
 		SubmittedBy:        int64(userId),
 	}
 
-	return h.manipulSVC.AddPendingUniversity(unversityData, userId)
+	go func() {
+		if err := notify.NotifyNewUniversity(data); err != nil {
+			//TODO log here
+		}
+	}()
+
+	return h.manipulSVC.AddPendingUniversity(data, userId)
 
 }

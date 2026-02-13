@@ -3,6 +3,7 @@ package manipulation
 import (
 	"ostadbun/entity"
 	manipulationParam "ostadbun/param/manipulation"
+	notify "ostadbun/pkg/bale/notif"
 	"ostadbun/pkg/httpstorage"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,15 +29,20 @@ func (h Handler) addPendingLesson(c *fiber.Ctx) error {
 		})
 	}
 
-	unversityData := entity.PendingLesson{
+	data := entity.PendingLesson{
 		Name:               acceptData.Name,
 		NameEnglish:        acceptData.NameEnglish,
 		DescriptionEnglish: acceptData.DescriptionEnglish,
-		Description:        &acceptData.Description,
+		Description:        acceptData.Description,
 		Difficulty:         acceptData.Difficulty,
 		SubmittedBy:        int64(userId),
 	}
 
-	return h.manipulSVC.AddPendingLesson(unversityData, userId)
+	go func() {
+		if err := notify.NotifyNewLesson(data); err != nil {
+			//TODO log here
+		}
+	}()
 
+	return h.manipulSVC.AddPendingLesson(data, userId)
 }
