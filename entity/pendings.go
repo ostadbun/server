@@ -22,19 +22,19 @@ type PendingUniversity struct {
 }
 
 type PendingProfessor struct {
-	Id                 int64       `json:"id" db:"id"`
-	Name               string      `json:"name" db:"name"`
-	EducationHistory   interface{} `json:"education_history" db:"education_history"` // jsonb
-	ImageUrl           *string     `json:"image_url,omitempty" db:"image_url"`
-	Description        *string     `json:"description,omitempty" db:"description"`
-	Status             string      `json:"status" db:"status"`
-	SubmittedBy        int64       `json:"submitted_by" db:"submitted_by"`
-	SubmittedAt        time.Time   `json:"submitted_at" db:"submitted_at"`
-	NameEnglish        string      `json:"name_english" db:"name_english"`
-	DescriptionEnglish string      `json:"description_english" db:"description_english"`
-	ApprovedBy         *int64      `json:"approved_by,omitempty" db:"approved_by"`
-	ApprovedAt         *time.Time  `json:"approved_at,omitempty" db:"approved_at"`
-	RejectionReason    *string     `json:"rejection_reason,omitempty" db:"rejection_reason"`
+	Id                 int64              `json:"id" db:"id"`
+	Name               string             `json:"name" db:"name"`
+	EducationHistory   *map[string]string `json:"education_history" db:"education_history"` // jsonb
+	ImageUrl           *string            `json:"image_url,omitempty" db:"image_url"`
+	Description        *string            `json:"description,omitempty" db:"description"`
+	Status             string             `json:"status" db:"status"`
+	SubmittedBy        int64              `json:"submitted_by" db:"submitted_by"`
+	SubmittedAt        time.Time          `json:"submitted_at" db:"submitted_at"`
+	NameEnglish        string             `json:"name_english" db:"name_english"`
+	DescriptionEnglish string             `json:"description_english" db:"description_english"`
+	ApprovedBy         *int64             `json:"approved_by,omitempty" db:"approved_by"`
+	ApprovedAt         *time.Time         `json:"approved_at,omitempty" db:"approved_at"`
+	RejectionReason    *string            `json:"rejection_reason,omitempty" db:"rejection_reason"`
 }
 
 type PendingLesson struct {
